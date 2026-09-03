@@ -221,22 +221,7 @@ class SoundEngine {
     };
   }
 
-  playTrack(trackKey) {
-    if (!this.tracks[trackKey]) return;
-    this.stopTrack();
-
-    this.currentTrack = this.tracks[trackKey];
-    this.bpm = this.currentTrack.bpm;
-    this.beatInterval = 60 / this.bpm;
-    this.stepIndex = 0;
-    this.startTime = this.ctx.currentTime;
-    this.isPlaying = true;
-
-    // Start 16th-note sequencer schedule loop
-    this.scheduleNotes();
-  }
-
-  stopTrack() {
+    stopTrack() {
     this.isPlaying = false;
     if (this.timerId) {
       clearTimeout(this.timerId);
@@ -260,7 +245,10 @@ class SoundEngine {
   }
 
   playTrack(trackKey) {
-    if (!this.tracks[trackKey]) return;
+    if (!this.ctx) {
+      this.init();
+    }
+    if (!this.ctx || !this.tracks[trackKey]) return;
     this.stopTrack();
 
     this.currentTrack = this.tracks[trackKey];

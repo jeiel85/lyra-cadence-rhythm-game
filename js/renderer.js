@@ -319,7 +319,7 @@ class Renderer {
 
     this.ctx.fillStyle = '#ffffff';
     this.ctx.beginPath();
-    this.ctx.roundRect(boxX, boxY, boxW, boxH, 4);
+    if (this.ctx.roundRect) { this.ctx.roundRect(boxX, boxY, boxW, boxH, 4); } else { this.ctx.rect(boxX, boxY, boxW, boxH); }
     this.ctx.fill();
 
     // Dotted inner frame

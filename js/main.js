@@ -56,50 +56,96 @@ class Game {
   }
 
   start() {
+    try {
+      window.soundEngine.init();
+    } catch (e) {
+      console.warn("AudioContext init error:", e);
+    }
     window.spriteManager.init();
     window.stageManager.init();
+
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) overlay.style.display = 'none';
+
+    this.state = 'PLAYING';
     this.loadStage(1);
 
-    document.getElementById('start-overlay').style.display = 'none';
-    this.state = 'PLAYING';
-    window.soundEngine.init();
-    window.soundEngine.playTrack('stage1');
-
     // Trigger initial dialog
-    this.startDialogueSequence(this.currentStage.dialogues);
+    if (this.currentStage && this.currentStage.dialogues) {
+      this.startDialogueSequence(this.currentStage.dialogues);
+    }
 
     requestAnimationFrame((t) => this.loop(t));
   }
 
   initUI() {
-    // Start button
-    document.getElementById('btn-start').addEventListener('click', () => this.start());
+    // Start button & overlay click
+    const startBtn = document.getElementById('btn-start');
+    if (startBtn) {
+      startBtn.addEventListener('click', (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        this.start();
+      });
+    }
+
+    const startOverlay = document.getElementById('start-overlay');
+    if (startOverlay) {
+      startOverlay.addEventListener('click', () => {
+        this.start();
+      });
+    }
+
+    // Keydown start (Space or Enter on title screen)
+    window.addEventListener('keydown', (e) => {
+      if (this.state === 'TITLE') {
+        if (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyZ') {
+          this.start();
+        }
+      }
+    });
 
     // Controls bar buttons
-    document.getElementById('btn-mute').addEventListener('click', (e) => {
-      const active = window.soundEngine.toggleMute();
-      e.target.textContent = active ? '🔊 Sound: On' : '🔇 Sound: Muted';
-    });
+    const muteBtn = document.getElementById('btn-mute');
+    if (muteBtn) {
+      muteBtn.addEventListener('click', (e) => {
+        const active = window.soundEngine.toggleMute();
+        e.target.textContent = active ? '🔊 Sound: On' : '🔇 Sound: Muted';
+      });
+    }
 
-    document.getElementById('btn-crt').addEventListener('click', (e) => {
-      const crt = document.getElementById('crt-overlay');
-      crt.classList.toggle('disabled');
-      e.target.textContent = crt.classList.contains('disabled') ? '📺 CRT: Off' : '📺 CRT: On';
-    });
+    const crtBtn = document.getElementById('btn-crt');
+    if (crtBtn) {
+      crtBtn.addEventListener('click', (e) => {
+        const crt = document.getElementById('crt-overlay');
+        if (crt) {
+          crt.classList.toggle('disabled');
+          e.target.textContent = crt.classList.contains('disabled') ? '📺 CRT: Off' : '📺 CRT: On';
+        }
+      });
+    }
 
-    document.getElementById('btn-touch').addEventListener('click', (e) => {
-      const pad = document.getElementById('touch-controls');
-      pad.classList.toggle('active');
-    });
+    const touchBtn = document.getElementById('btn-touch');
+    if (touchBtn) {
+      touchBtn.addEventListener('click', (e) => {
+        const pad = document.getElementById('touch-controls');
+        if (pad) pad.classList.toggle('active');
+      });
+    }
 
-    document.getElementById('btn-debug').addEventListener('click', (e) => {
-      this.renderer.showDebug = !this.renderer.showDebug;
-      e.target.textContent = this.renderer.showDebug ? '🛠️ FPS: On' : '🛠️ FPS: Off';
-    });
+    const debugBtn = document.getElementById('btn-debug');
+    if (debugBtn) {
+      debugBtn.addEventListener('click', (e) => {
+        this.renderer.showDebug = !this.renderer.showDebug;
+        e.target.textContent = this.renderer.showDebug ? '🛠️ FPS: On' : '🛠️ FPS: Off';
+      });
+    }
 
-    document.getElementById('btn-restart').addEventListener('click', () => {
-      this.loadStage(this.stageId);
-    });
+    const restartBtn = document.getElementById('btn-restart');
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        this.loadStage(this.stageId);
+      });
+    }
   }
 
   loadStage(stageNum) {
@@ -129,10 +175,12 @@ class Game {
     this.floatingTexts = [];
 
     // Switch Music
-    window.soundEngine.playTrack(this.currentStage.musicKey);
+    if (window.soundEngine) {
+      window.soundEngine.playTrack(this.currentStage.musicKey);
+    }
 
     // If boss stage, activate boss
-    if (this.currentStage.isBossStage) {
+    if (this.currentStage.isBossStage && window.bossManager) {
       window.bossManager.reset();
     }
 
@@ -285,7 +333,7 @@ class Game {
       }
 
       // Damage or deflect Boss
-      if (this.currentStage.isBossStage) {
+      if (this.currentStage.isBossStage && window.bossManager) {
         window.bossManager.checkMeleeHit(this, playerBox, accuracy);
       }
     }
@@ -360,7 +408,7 @@ class Game {
       this.fpsTimer = 0;
     }
 
-    const currentBeat = window.soundEngine.getCurrentBeat();
+    const currentBeat = window.soundEngine ? window.soundEngine.getCurrentBeat() : 0;
 
     // Update Game Logic
     this.update(delta, currentBeat);
@@ -373,7 +421,7 @@ class Game {
 
   update(delta, currentBeat) {
     // Restart stage on R
-    if (window.inputHandler.wasPressed('KeyR')) {
+    if (window.inputHandler && window.inputHandler.wasPressed('KeyR')) {
       this.loadStage(this.stageId);
       return;
     }
@@ -417,12 +465,12 @@ class Game {
         if (this.dialogueTimer >= 0.03 && this.dialogueCharIndex < this.currentDialogue.text.length) {
           this.dialogueCharIndex++;
           this.dialogueTimer = 0;
-          if (this.dialogueCharIndex % 2 === 0) {
+          if (this.dialogueCharIndex % 2 === 0 && window.soundEngine) {
             window.soundEngine.playDialogBlip();
           }
         }
 
-        if (window.inputHandler.isDialogueAdvance()) {
+        if (window.inputHandler && window.inputHandler.isDialogueAdvance()) {
           if (this.dialogueCharIndex < this.currentDialogue.text.length) {
             this.dialogueCharIndex = this.currentDialogue.text.length;
           } else {
@@ -441,13 +489,13 @@ class Game {
         this.currentStage.update(this);
       }
 
-      if (this.currentStage && this.currentStage.isBossStage) {
+      if (this.currentStage && this.currentStage.isBossStage && window.bossManager) {
         window.bossManager.update(this, currentBeat);
       }
     }
 
     if (this.state === 'GAMEOVER' || this.state === 'VICTORY') {
-      if (window.inputHandler.isDialogueAdvance()) {
+      if (window.inputHandler && window.inputHandler.isDialogueAdvance()) {
         if (this.state === 'GAMEOVER') {
           this.loadStage(this.stageId);
           this.state = 'PLAYING';
@@ -477,7 +525,7 @@ class Game {
       this.renderer.renderItems(this.currentStage.items, currentBeat);
       this.renderer.renderEnemies(this.currentStage.enemies, currentBeat);
 
-      if (this.currentStage.isBossStage) {
+      if (this.currentStage.isBossStage && window.bossManager) {
         this.renderer.renderBoss(window.bossManager, currentBeat);
       }
 
@@ -553,6 +601,8 @@ class Game {
     ctx.restore();
   }
 }
+
+window.Game = Game;
 
 window.addEventListener('DOMContentLoaded', () => {
   window.game = new Game();
