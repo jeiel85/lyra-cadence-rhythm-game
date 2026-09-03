@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lyra's Cadence - Retro Rhythm Adventure</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Retro Console Screen Frame -->
+    <div id="screen-bezel">
+      <div id="stage-sidebar">
+        <span id="stage-label">Introduction</span>
+      </div>
+
+      <div id="canvas-wrapper">
+        <canvas id="gameCanvas" width="320" height="180"></canvas>
+        
+        <!-- CRT scanline overlay -->
+        <div id="crt-overlay"></div>
+        
+        <!-- Start Audio Overlay (Browser audio policy) -->
+        <div id="start-overlay" class="overlay-modal">
+          <div class="modal-content">
+            <h1 class="pixel-title">LYRA'S CADENCE</h1>
+            <p class="subtitle">A Retro Rhythm Adventure</p>
+            <div class="instructions">
+              <p>🎵 Move & Attack on the <strong>Beat</strong> to build Combo!</p>
+              <p>⌨️ Controls: <strong>Arrow Keys / WASD</strong> to Move</p>
+              <p>⚔️ <strong>Space / Z</strong> to Attack / Interact</p>
+              <p>💬 <strong>Enter / Space</strong> to advance Dialog</p>
+            </div>
+            <button id="btn-start" class="retro-btn">START GAME</button>
+          </div>
+        </div>
+
+        <!-- Mobile Touch Controls -->
+        <div id="touch-controls">
+          <div id="dpad">
+            <button class="dpad-btn up" data-key="ArrowUp">▲</button>
+            <button class="dpad-btn left" data-key="ArrowLeft">◀</button>
+            <button class="dpad-btn center"></button>
+            <button class="dpad-btn right" data-key="ArrowRight">▶</button>
+            <button class="dpad-btn down" data-key="ArrowDown">▼</button>
+          </div>
+          <div id="action-buttons">
+            <button class="act-btn btn-b" data-key="KeyZ">ATK (Z)</button>
+            <button class="act-btn btn-a" data-key="Space">ACT (Space)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retro Bottom Control Bar -->
+    <div id="controls-bar">
+      <div class="control-item">
+        <button id="btn-mute" class="retro-icon-btn" title="Toggle Sound (M)">🔊 Sound: On</button>
+        <button id="btn-crt" class="retro-icon-btn" title="Toggle CRT Filter">📺 CRT: On</button>
+        <button id="btn-touch" class="retro-icon-btn" title="Toggle Touch Pad">📱 Touch Pad</button>
+        <button id="btn-debug" class="retro-icon-btn" title="Toggle Debug FPS">🛠️ FPS: On</button>
+        <button id="btn-restart" class="retro-icon-btn" title="Restart Stage (R)">🔄 Restart</button>
+      </div>
+      <div class="info-text">
+        Inspired by @partnano's "Slowly a game" | 4 Stages &amp; Boss Fight
+      </div>
+    </div>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/stages.js"></script>
+  <script src="js/boss.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

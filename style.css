@@ -1,0 +1,313 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: #121318;
+  background-image: radial-gradient(#202534 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  max-width: 100vw;
+}
+
+/* Screen Bezel - matching the Threads video frame */
+#screen-bezel {
+  display: flex;
+  flex-direction: row;
+  background: #0d121d;
+  border: 3px solid #3c4966;
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), inset 0 2px 6px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left vertical sidebar matching the "Introduction" vertical text */
+#stage-sidebar {
+  background: #171d2b;
+  border-right: 2px solid #2d384e;
+  width: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#stage-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 11px;
+  color: #6da278;
+  letter-spacing: 2px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px #000000;
+  white-space: nowrap;
+}
+
+#canvas-wrapper {
+  position: relative;
+  width: 640px;
+  height: 360px;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  #canvas-wrapper {
+    width: 800px;
+    height: 450px;
+  }
+}
+
+@media (max-width: 720px) {
+  #canvas-wrapper {
+    width: 90vw;
+    height: calc(90vw * 9 / 16);
+  }
+  #stage-sidebar {
+    width: 24px;
+  }
+  #stage-label {
+    font-size: 8px;
+  }
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+/* Subtle CRT scanline overlay */
+#crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 6px 100%;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+#crt-overlay.disabled {
+  opacity: 0;
+}
+
+/* Modal overlay */
+.overlay-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(8, 12, 18, 0.92);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  text-align: center;
+  max-width: 90%;
+  background: #1e2638;
+  border: 3px solid #5a709c;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+}
+
+.pixel-title {
+  font-size: 20px;
+  color: #ffca3a;
+  text-shadow: 2px 2px #d00000, 4px 4px #000;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 10px;
+  color: #8ac926;
+  margin-bottom: 20px;
+}
+
+.instructions {
+  font-size: 9px;
+  line-height: 1.8;
+  color: #e0e6ed;
+  margin-bottom: 24px;
+  text-align: left;
+  background: #111624;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid #1982c4;
+}
+
+.instructions strong {
+  color: #ffca3a;
+}
+
+.retro-btn {
+  background: #e63946;
+  color: #ffffff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  padding: 12px 20px;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px #9b2226;
+  transition: all 0.1s;
+}
+
+.retro-btn:hover {
+  background: #ff4d5a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px #9b2226;
+}
+
+.retro-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px #9b2226;
+}
+
+/* Touch controls */
+#touch-controls {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  display: none;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 20;
+}
+
+#touch-controls.active {
+  display: flex;
+}
+
+#dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 42px);
+  grid-template-rows: repeat(3, 42px);
+  pointer-events: auto;
+}
+
+.dpad-btn {
+  background: rgba(30, 40, 60, 0.75);
+  border: 2px solid #7d93be;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 6px;
+  touch-action: manipulation;
+}
+
+.dpad-btn:active {
+  background: #ffca3a;
+  color: #000;
+}
+
+.dpad-btn.up { grid-column: 2; grid-row: 1; }
+.dpad-btn.left { grid-column: 1; grid-row: 2; }
+.dpad-btn.center { grid-column: 2; grid-row: 2; background: rgba(20, 25, 40, 0.6); border: none; }
+.dpad-btn.right { grid-column: 3; grid-row: 2; }
+.dpad-btn.down { grid-column: 2; grid-row: 3; }
+
+#action-buttons {
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.act-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(230, 57, 70, 0.85);
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  box-shadow: 0 4px #781d22;
+  touch-action: manipulation;
+}
+
+.act-btn.btn-b {
+  background: rgba(42, 157, 143, 0.85);
+  box-shadow: 0 4px #1b665c;
+}
+
+.act-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px #000;
+}
+
+/* Bottom Controls Bar */
+#controls-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.control-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.retro-icon-btn {
+  background: #222938;
+  border: 1px solid #485773;
+  color: #c0cbdb;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.retro-icon-btn:hover {
+  background: #333d52;
+  color: #ffffff;
+  border-color: #ffca3a;
+}
+
+.info-text {
+  font-size: 8px;
+  color: #7b88a1;
+  text-align: center;
+}
