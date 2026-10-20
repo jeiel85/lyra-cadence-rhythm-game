@@ -306,6 +306,13 @@ body {
   border-color: #ffca3a;
 }
 
+.repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+}
+
 .info-text {
   font-size: 8px;
   color: #7b88a1;
